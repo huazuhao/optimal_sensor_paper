@@ -97,66 +97,75 @@ We begin with the state space form of a linear time-invariant (LTI) dynamical sy
 \begin{equation}
 \begin{aligned}
 M\dot{x}(t) = Ax(t)+Bu(t)\\
-y(t) = Cx(t)+Du(t)+\epsilon\\
+y(t) = Cx(t)+Du(t)+\epsilon(t)\\
 \end{aligned}
 \end{equation}
-The state vector is x(t) $\in \mathbb{R}^{N}$. The input or control is modeled as u(t) $\in \mathbb{R}^{M}$. The output is  y(t) $\in \mathbb{R}^{P}$. In the context of learning differential equations,  M $\in \mathbb{R}^{N*N}$ is usually obtained through the discretization process. The dynamics matrix is A $\in \mathbb{R}^{N*N}$ . The input matrix is B $\in \mathbb{R}^{N*M}$. The sensor matrix is C $\in \mathbb{R}^{P*N}$. The feedthrough matrix is D $\in \mathbb{R}^{P*M}$. 
+The state vector is x(t) $\in \mathbb{R}^{N}$. The input or control is modeled as u(t) $\in \mathbb{R}^{M}$. $\epsilon (t) \in \mathbb{R}^{P}$ models noise. The output is  y(t) $\in \mathbb{R}^{P}$. In the context of learning differential equations,  M $\in \mathbb{R}^{N\times N}$ is usually obtained through the discretization process. The dynamics matrix is A $\in \mathbb{R}^{N\times N}$. The input matrix is B $\in \mathbb{R}^{N\times M}$. The sensor matrix is C $\in \mathbb{R}^{P\timesN}$. The feedthrough matrix is D $\in \mathbb{R}^{P\times M}$. 
 
-We can then rewrite the above system of equations as:
-\begin{gather}
- \begin{bmatrix} y(0)\\...\\y(t-1) \end{bmatrix}
- = Ox(0) + T \begin{bmatrix} u(0)\\...\\u(t-1) \end{bmatrix}
- + \begin{bmatrix} \epsilon\\...\\\epsilon \end{bmatrix}
-\end{gather}
-where
+We are interested in LTI dynamical system because one can discretize differential equations along with boundary conditions to obtain a LTI dynamical system. M,A,B,C, and D can all be obtained through the discretization process of differential equations. 
 
-\begin{gather}
- O = \begin{bmatrix} C\\CM^{-1}A\\...\\C(M^{-1}A)^{t-1} \end{bmatrix}
-\end{gather}
-
-\begin{gather}
-T = \begin{bmatrix} 
- D & 0 & ... \\
- CB & D & 0 & ...\\
- ...\\
- C(M^{-1}A)^{t-2}B & C(M^{-1}A)^{t-3}B & ... & CB & D
- \end{bmatrix}
-\end{gather}
-
-To obtain an estimation of $X(0)$ with the presence of noise, we the invoke the least square method. The solution for this least square method is
+For the above LTI dynamical system, one can solve $y(t)$ analytically. 
 \begin{equation}
-    x_{ls}(0) = x(0)+O^{\dagger}\begin{bmatrix} \epsilon\\...\\\epsilon \end{bmatrix}
+\begin{split}
+    &y(t) = Ce^{M^{-1}At}x_{0} + \int_{0}^{t} Ce^{M^{-1}A{t-\tau}}Bu(\tau)d\tau + Du(t)+\epsilon \\
+\end{split}
 \end{equation}
-or
-\begin{equation}
-    x_{ls}(0) = O^{\dagger}\bigg(\begin{bmatrix} y(0)\\...\\y(t-1) \end{bmatrix} - T \begin{bmatrix} u(0)\\...\\u(t-1) \end{bmatrix}\bigg)
-\end{equation}
-and $O^{\dagger}$ is the Moore-Penrose pseudo-inverse, $O^{\dagger} = (O^{T}O)^{-1}O$. To make the least square method as robust as possible to noise, we want the smallest eigenvalue of the $O$ matrix to be as large as possible. 
+% We can then rewrite the above system of equations as:
+% \begin{gather}
+%  \begin{bmatrix} y(0)\\...\\y(t-1) \end{bmatrix}
+%  = Ox(0) + T \begin{bmatrix} u(0)\\...\\u(t-1) \end{bmatrix}
+%  + \begin{bmatrix} \epsilon\\...\\\epsilon \end{bmatrix}
+% \end{gather}
+% where
+
+% \begin{gather}
+%  O = \begin{bmatrix} C\\CM^{-1}A\\...\\C(M^{-1}A)^{t-1} \end{bmatrix}
+% \end{gather}
+
+% \begin{gather}
+% T = \begin{bmatrix} 
+%  D & 0 & ... \\
+%  CB & D & 0 & ...\\
+%  ...\\
+%  C(M^{-1}A)^{t-2}B & C(M^{-1}A)^{t-3}B & ... & CB & D
+%  \end{bmatrix}
+% \end{gather}
+
+% To obtain an estimation of $X(0)$ with the presence of noise, we the invoke the least square method. The solution for this least square method is
+% \begin{equation}
+%     x_{ls}(0) = x(0)+O^{\dagger}\begin{bmatrix} \epsilon\\...\\\epsilon \end{bmatrix}
+% \end{equation}
+% or
+% \begin{equation}
+%     x_{ls}(0) = O^{\dagger}\bigg(\begin{bmatrix} y(0)\\...\\y(t-1) \end{bmatrix} - T \begin{bmatrix} u(0)\\...\\u(t-1) \end{bmatrix}\bigg)
+% \end{equation}
+% and $O^{\dagger}$ is the Moore-Penrose pseudo-inverse, $O^{\dagger} = (O^{T}O)^{-1}O$. To make the least square method as robust as possible to noise, we want the smallest eigenvalue of the $O$ matrix to be as large as possible. 
 
 \subsection{Observability gramian}
-We need to introduce the observability gramian. The observability gramian for a LTI dynamical system described in equation 3.1 can be obtained by solving the generalized lyapunov equation. The matrix Q appearing in the generalized lyapunov equation is the observability gramian. 
+The observability gramian for a LTI dynamical system described in equation 3.1 can be obtained by solving the generalized lyapunov equation. The matrix Q appearing in the generalized lyapunov equation is the observability gramian. 
 
 \begin{equation}
     A^{T}QM + MQA+C^{T}C = 0
 \end{equation}
 
-Generally one might be interested in computing the observability gramian because if Q is full rank, than the standard control theory tells us that one can solve the initial condition exactly by inverting the O matrix in equation 3.2. 
-We are interested in the observability gramian because one can express $x_{ls}(0)$ in the following way:
+Generally one might be interested in computing the observability gramian because if Q is full rank, than the standard control theory tells us that one can recover the exact initial condition from full access to noiseless data. 
 
-\begin{equation}
-    x_{ls}(0) = \bigg(\sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})\bigg)^{-1}
-    \sum_{\tau = 0}^{t-1}(M^{-1}A^{T})^{\tau}C^{T}\Tilde{y}(\tau)
-\end{equation}
-where $\Tilde{y} = y-h*u$, where h is impulse response and * is convolution.  
-Now, 
-\begin{equation}
-    \sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})
-\end{equation}
-is the observability gramian
+
+
+% \begin{equation}
+%     x_{ls}(0) = \bigg(\sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})\bigg)^{-1}
+%     \sum_{\tau = 0}^{t-1}(M^{-1}A^{T})^{\tau}C^{T}\Tilde{y}(\tau)
+% \end{equation}
+% where $\Tilde{y} = y-h*u$, where h is impulse response and * is convolution.  
+% Now, 
+% \begin{equation}
+%     \sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})
+% \end{equation}
+% is the observability gramian
 
 \subsection{Properties of log det of observability gramian} First, we will introduce the concept of submodularity and monotone increasing. Then, we will state that the log determinant of the observability gramian is a submodular  and monotone increasing set function. Lastly, we will argue a way of solving this optimization problem. 
 
-Sensor placement problems can be formulated as set function optimization problems. For a given finite set $V = \{1,2,...,M\}$, a set function $f:2^{V} \to R$ assigns a real number to each subset of V. In the problem of optimal sensor placements for learning initial conditions, the elements of V represent potential sensor locations. 
+Sensor placement problems can be formulated as set function optimization problems. For a given finite set $V = \{1,2,...,M\}$, a set function $f:2^{V} \to R$ assigns a real number to each subset of V. In the problem of optimal sensor placements for learning initial conditions, the elements of V represent potential sensor locations and we choose to either place a sensor or not at those locations. 
 
 \begin{definition}
 Submodularity. A set function $f:2^{V} \to R$ is called submodular if for all subsets A 
@@ -165,7 +174,7 @@ $\subseteq$ B $\subseteq$ V and all elements s $\notin$ B, it holds that
     f(A\cup \{s\})-f(A) \geqslant f(B\cup\{s\})-f(B)
 \end{equation}
 \end{definition}
-Intuitively, submodularity means we get diminishing returns. We can understand equation 3.8 as stating that adding an element to a smaller set gives a larger return than adding an element to a larger set. 
+Intuitively, submodularity means we get diminishing returns. We can understand equation 3.4 as stating that adding an element to a smaller set gives a larger return than adding an element to a larger set. 
 
 \begin{definition}
 A set function $f:2^{V} \to R$ is called monotone increasing if for all subsets A,B $\subseteq$ V it holds that
@@ -173,12 +182,11 @@ A set function $f:2^{V} \to R$ is called monotone increasing if for all subsets 
     A \subseteq B \to f(a) \leqslant f(b)
 \end{equation}
 \end{definition}
-
 Intuitively, this means adding an element to a set always gives a positive return.
 
-Tyler Summers et al in \cite{summers} proofed that the log determinant of controllability gramian is submodular and monotone increasing. Because controllability gramians and observability gramians are duals of each other, the log determinant of observability gramian is also submodular and monotone increasing. 
+Tyler Summers et al in \cite{summers} proofed that the log determinant of controllability gramian is submodular and monotone increasing. Because controllability gramians and observability gramians are duals\cite{Kalman}, the log determinant of observability gramian is also submodular and monotone increasing. 
 
-Because the log determinant of observability gramian is submodular and monotone increasing, once can solve such an optimization problem by the greedy algorithm. 
+Because the log determinant of observability gramian is submodular and monotone increasing, onc can solve such an optimization problem by the greedy algorithm. 
 \begin{theorem}\cite{greedy}
 Let $f^{*}$ be the true optimal solution of a set function optimization problem. Let $f(S_{greedy})$ be the solution of the set function optimization problem obtained from applying the greedy algorithm. If f is submodular and monotone increasing, then 
 \begin{equation}
@@ -189,7 +197,7 @@ Let $f^{*}$ be the true optimal solution of a set function optimization problem.
 \end{theorem}
 In the above equation, k denotes the size of the set. The bound guarantee is the best for any polynomial time algorithm, assuming $P \ne NP$. Also, one should note that this is a worst-case bound. Often, the greedy algorithm performs better than this bound. 
 
-\subsection{SVD update} Here, we want to provide the background of how to update a singular value decomposition. Let X $\in \mathbb{R}^{p*q}$ have rank r and economy SVD $USV^{T} = X$ with S $\in \mathbb{R}^{r*r}$. Let A $\in \mathbb{R}^{p*c}$ and B $\in \mathbb{R}^{q*c}$ be two matrices of rank c. We want to know the SVD of the sum of $X+AB^{T}$
+\subsection{SVD update} Here, we want to provide the background of how to update a singular value decomposition. Let X $\in \mathbb{R}^{p \times q}$ have rank r and economy SVD. $USV^{T} = X$ with S $\in \mathbb{R}^{r\times r}$. Let A $\in \mathbb{R}^{p\times c}$ and B $\in \mathbb{R}^{q \times c}$ be two matrices of rank c. We want to know the SVD of the sum of $X+AB^{T}$
 \[ X+AB^{T}=  
 \left( \begin{array}{cc}
 U & A \\
@@ -262,38 +270,38 @@ For more details on SVD update, we recommend \cite{svd-update}.
 \begin{equation}
 \begin{aligned}
 &\text{minimize}
-&&\lVert \mathcal{C}X -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2\\
+&&\lVert Y -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2\\
 & \text{subject to}
-&& \mathcal{L}(X ,z) = 0
+&& \mathcal{L}(Y ,z) = 0
 \end{aligned}
 \end{equation}
-We begin to solve this constrained minimization problem by first rewriting the problem in the form of an unconstrained minimization problem. Notice the constraint equation, $\mathcal{L}(X ,z) = 0$. This equation tells us that for every z, we can solve the constraint equation and obtain an corresponding X. Let's call this mapping from z to X as $\psi: \psi(z) = X$. So, $\lVert \mathcal{C}X -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$ becomes $\lVert \mathcal{C}\phi(z) -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$. Notice that the objective function is now just a function of the unknown z, which we can solve by Newton-Conjugate Gradient. The Newton equation we want to solve is $\nabla^2 f(z) d = -\nabla f(z)$, where $f(z) = \lVert \mathcal{C}\phi(z) - Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$ and d is step size. So, the task now is computing the gradient and applying the Hessian to a vector. 
+We begin to solve this constrained minimization problem by first rewriting the problem in the form of an unconstrained minimization problem. Notice the constraint equation, $\mathcal{L}(Y ,z) = 0$. This equation tells us that for every z, we can solve the constraint equation and obtain an corresponding Y. Let's call this mapping from z to Y as $\psi: \psi(z) = Y$. So, $\lVert Y -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$ becomes $\lVert \phi(z) -Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$. Notice that the objective function is now just a function of the unknown z, which we can solve by Newton-Conjugate Gradient. The Newton equation we want to solve is $\nabla^2 f(z) d = -\nabla f(z)$, where $f(z) = \lVert \phi(z) - Y_{obs} \rVert^2+\alpha \lVert z \rVert^2$ and d is step size. So, the task now is computing the gradient and applying the Hessian to a vector. 
 \begin{algorithm}[H]
 %\SetAlgoLined
-1. Given z, solve ${L}(X ,z) = 0$. Denote the solution by $X(z)$ \\
-2. Solve $\lambda$ in the adjoint equation: $\mathcal{L}_{X}(X(z) ,z)^{*}\lambda = 
-    -f_{X}(X(z) ,z)$ \\
-3. Compute the gradient: $\nabla f(z) = f_{z}(X(z),z)+
-    \mathcal{L}_{z}(X(z) ,z)^{*}\lambda$
+1. Given z, solve ${L}(Y ,z) = 0$. Denote the solution by $Y(z)$ \\
+2. Solve $\lambda$ in the adjoint equation: $\mathcal{L}_{Y}(Y(z) ,z)^{*}\lambda = 
+    -f_{Y}(Y(z) ,z)$ \\
+3. Compute the gradient: $\nabla f(z) = f_{z}(Y(z),z)+
+    \mathcal{L}_{z}(Y(z) ,z)^{*}\lambda$
  \caption{Gradient Computation Using Adjoints}
 \end{algorithm}
-The star operator in the adjoint equation means the adjoint operation. In this context, since the discretized differential equations usually result in matrices, the adjoint operation usually means the adjoint of matrices. The subscript in the above algorithm means the variable we are taking derivative with respect to. We will also use this notation in the Hessian-Times-Vector algorithm. 
+The star operator in the adjoint equation means the adjoint operation. In this context, since the discretized differential equations usually result in matrices, the adjoint operation usually means the adjoint of matrices. The subscript in the above algorithm means the variable we are taking derivative with respect to. We will also use this notation in the Hessian-Times-Vector algorithm for taking derivative. 
 
 \begin{algorithm}[H]
 %\SetAlgoLined
  Given v, the vector in the Hessian-Times-Vector Computation\\
  \\
-1. Given z, solve ${L}(X ,z) = 0$. Denote the solution by $X(z)$. (If not done already.)\\
-2. Solve $\lambda$ in the adjoint equation: $\mathcal{L}_{X}(X(z) ,z)^{*}\lambda = 
-    -f_{X}(X(z) ,z)$. (If not done already.) \\
-3. Solve s in the sensitivity equation: $\mathcal{L}_{X}(X(z) ,z)s = 
-    \mathcal{L}_{z}(X(z) ,z)v$\\
-4. Solve p in the adjoint sensitivity equation: $\mathcal{L}_{X}(X(z) ,z)^{*}p = 
-    LG_{XX}(X(z) ,z)s-
-    LG_{Xz}(X(z) ,z)v$\\
-5. Compute the result of applying Hessian to a vector: $\nabla^2 f(z) v = \mathcal{L}_{z}(X(z),z)^{*}p-
-    LG_{zX}(X(z) ,z)s+
-    LG_{zz}(X(z) ,z)v$
+1. Given z, solve ${L}(Y ,z) = 0$. Denote the solution by $Y(z)$. (If not done already.)\\
+2. Solve $\lambda$ in the adjoint equation: $\mathcal{L}_{Y}(Y(z) ,z)^{*}\lambda = 
+    -f_{Y}(Y(z) ,z)$. (If not done already.) \\
+3. Solve s in the sensitivity equation: $\mathcal{L}_{Y}(Y(z) ,z)s = 
+    \mathcal{L}_{z}(Y(z) ,z)v$\\
+4. Solve p in the adjoint sensitivity equation: $\mathcal{L}_{Y}(Y(z) ,z)^{*}p = 
+    LG_{YY}(Y(z) ,z)s-
+    LG_{Yz}(Y(z) ,z)v$\\
+5. Compute the result of applying Hessian to a vector: $\nabla^2 f(z) v = \mathcal{L}_{z}(Y(z),z)^{*}p-
+    LG_{zY}(Y(z) ,z)s+
+    LG_{zz}(Y(z) ,z)v$
  \caption{Hessian-Times-Vector Computation}\\
 \end{algorithm}
 
@@ -311,18 +319,59 @@ LG means Lagrangian in the above algorithm. It takes the form of $f(X,z)+k\mathc
 We start this section by first stating a method of computing the observability gramian analytically. 
 
 \subsection{A suitable objective function}
-A common strategy for choosing optimal sensor placement in control theory is by optimizing an objective function from scalarizing the observability gramian. Common scalarization includes the trace of the observability gramian, the trace of the inverse of the observability gramian, and the log determinant of the observability gramian. Among those scalarization schemes, we need to find one that is particular suited for learning initial conditions. Recall 
-
+A common strategy for choosing optimal sensor placement in control theory is by optimizing an objective function from scalarizing the observability gramian. Common scalarization includes the trace of the observability gramian, the trace of the inverse of the observability gramian, and the log determinant of the observability gramian. Among those scalarization schemes, we need to find one that is particular suited for learning initial conditions. Here, we will argue that we need to find a scalarization scheme whose maximum value will result in the maximum value of smallest eigenvalue of the observability gramian. Recall the solution to the dynamical system without any observation noise is
 \begin{equation}
-    x_{ls}(0) = \bigg(\sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})\bigg)^{-1}
-    \sum_{\tau = 0}^{t-1}(M^{-1}A^{T})^{\tau}C^{T}\Tilde{y}(\tau)
+\begin{split}
+    &y(t) = Ce^{M^{-1}At}x_{0} + \int_{0}^{t} Ce^{M^{-1}A{t-\tau}}Bu(\tau)d\tau + Du(t) \\
+    &~~~~~= Ce^{M^{-1}At}x_{0} + f(u(t)).
+\end{split}
 \end{equation}
-and 
+So, the problem of learning initial condition, which is $\min_{x_{0}}\frac{1}{2}\lVert Y -Y_{obs} \rVert^2+\alpha \lVert x_{0} \rVert^2$, becomes
 \begin{equation}
-    Observability ~ Gramian (OG) = \sum_{\tau - 0}^{t-1} (M^{-1}A^{T})^{\tau}C^{T}C(M^{-1}A^{\tau})
+    \begin{split}
+        \min_{x_{0}} \frac{1}{2}\int_{0}^{\infty} [Ce^{M^{-1}At}x_{0} + f(u(t))-Y_{obs}(t)]^{T} [Ce^{M^{-1}At}x_{0} + f(u(t))-Y_{obs}(t)] dt\\
+        + \alpha x_{0}^{T}x_{0}.
+    \end{split}
+\end{equation}
+We can define $\widetilde{Y}_{obs}(t)$ as $\widetilde{Y}_{obs}(t) = Y_{obs}(t) - f(u(t))$, as $u(t)$ is assumed to be completely known. This means $\widetilde{Y}_{obs}(t)$ is the noisy observation with portion due to control input subtracted. We also set $\alpha$ to be 0 for purpose of finding the correct scalarization scheme. So, we can simplify the equation and the objective function becomes 
+\begin{equation}
+    \begin{split}
+        \min_{x_{0}} \frac{1}{2}\int_{0}^{\infty} [Ce^{M^{-1}At}x_{0} - \widetilde{Y}_{obs}(t)]^{T} [Ce^{M^{-1}At}x_{0} - \widetilde{Y}_{obs}(t)] dt.
+    \end{split}
+\end{equation}
+We then compute the optimality condition of the above equation, which is done by taking derivative with respect to $x_{0}$ and setting the equation to 0. This optimality condition is
+\begin{equation}
+    \begin{split}
+        \int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}Ce^{M^{-1}At} dt ~ x_{0} = \int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\widetilde{Y}_{obs}(t) dt.
+    \end{split}
+\end{equation}
+Notice that the quantity multiplying $x_{0}$ is precisely the observability gramian, which we will denote as Q. We can decompose $\widetilde{Y}_{obs}(t)$ as $\widetilde{Y}_{obs}(t) = \widetilde{Y}(t)+\epsilon(t)$. $\widetilde{Y}(t)$ should be understood as what would have been the observation given the ground truth solution, $x_{0}^\star$, the complete knowledge of $u(t)$, and no noise in the observation. We will solve the above linear system in $x_{0}$ by inverting Q. 
+\begin{equation}
+    x_{0} = Q^{-1}\int_{0}^{\infty} e^{M^{-1}A^{T}}C^{T}\widetilde{Y}(t) dt +
+    Q^{-1}\int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt
+\end{equation}
+So, 
+\begin{equation}
+    x_{0} = x_{0}^\star + Q^{-1}\int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt.
+\end{equation}
+So, our job is to make sure the effect of the noise is as small as possible. In other words, we want to bound $\lVert x_{0}-x_{0}^\star\rVert^2$ from above. Now, let the smallest eigenvalue of the observability gramian be $\lambda$, then we have
+\begin{equation}
+    \lambda \|x_{0}-x_{0}^\star\|^2 \le (x_0 - x_0^\star)^T Q (x_0 - x_0^\star). 
+\end{equation}
+Now we can apply the Cauchy-Schwarz inequality to this term: $(x_0 - x_0^\star)^T Q (x_0 - x_0^\star)$. Furthermore, we should note that Q is a symmetric matrix and $Q(x_{0}-x_{0}^\star) = \int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt$. So,
+\begin{equation}
+\begin{split}
+    (x_0 - x_0^\star)^T Q (x_0 - x_0^\star) =  (x_0 - x_0^\star)^T \int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt \\
+    \le \|(x_0 - x_0^\star)\|\|\int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt \|.
+\end{split}
+\end{equation}
+So, 
+\begin{equation}
+    \|x_{0}-x_{0}^\star\|^2 \le \frac{1}{\lambda} \|\int_{0}^{\infty} e^{M^{-1}A^{T}t}C^{T}\epsilon(t) dt \|.
 \end{equation}
 
-Therefore, in order for the initial condition to be as robust as possible to noise, we want the smallest eigenvalue of the observability gramian to be as large as possible. So the objective function for determining optimal sensor placement should maximize the smallest eigenvalue of the observability gramian. Tyler Summers et al in \cite{summers} randomly generated 10,000 discrete stable dynamics system. For each of the randomly generated system, they apply the greedy algorithm to select 7 actuators from a set of possible 25 for different scalarized controllability gramians. Then, they computed the eigenvalues of the controllability gramian and averaged over those 10,000 samples. The result is shown below:
+
+Therefore, in order for the initial condition to be as robust as possible to noise, we want the smallest eigenvalue of the observability gramian to be as large as possible. So the objective function for determining optimal sensor placement should maximize the smallest eigenvalue of the observability gramian. Tyler Summers et al in \cite{summers} randomly generated 10,000 discrete stable dynamics system. For each of the randomly generated system, they apply the greedy algorithm to select 7 actuators from a set of possible 25 actuators for different scalarized controllability gramians. Then, they computed the eigenvalues of the controllability gramian and averaged over those 10,000 samples. The result is shown below:
 
 \begin{figure}[H]
     \centering
@@ -331,18 +380,67 @@ Therefore, in order for the initial condition to be as robust as possible to noi
     %\label{fig:galaxy}
 \end{figure}
 
-From the graph, it's clear that Trace is not the optimal scalarization procedure for the problem of learning initial conditions. Of the other three scalarization schemes, it appears the effect on the smallest eigenvalue of the controllability gramian is the same. So, the second criteria of choosing a better scalarization procedure is considering how efficient it is to carry out the computation and how amenable the scalarization procedure is to numerical low rank approximation. So, we decided to use the log determinant scalarization schemes. 
+Though Tyler Summers et al did their result on the controllability gramian, the result should equally apply to the observability gramian. From the graph, it's clear that trace is not the optimal scalarization procedure. Of the other three scalarization schemes, it appears the effect on the smallest eigenvalue is the same. So, the second criteria of choosing a better scalarization procedure is considering how efficient it is to carry out the computation and how amenable the scalarization procedure is to numerical low rank approximation. So, we decided to use the log determinant scalarization schemes. 
 
+\subsection{Base Algorithm} Now we know we need to maximize the log determinant of the observability gramian. Furthermore, we know the log determinant of the observability gramian is monotone increasing and submodular We can now solve the optimal sensor placement problem for learning initial conditions by applying the greedy algorithm on maximizing the log determinant of the observability gramian. If we are given a maximum number of sensors to place, we can solve this sensor placement problem by the following algorithm. 
 
-\subsection{Computing observability gramian} We start with the M matrix from the LTI dynamical system in equation 3.1, which is a symmetric positive definite matrix with size n by n. Usually, this M matrix is the mass matrix after discretizing a differential equation, and the size of the M matrix corresponds to the number of spatial discretization points. After obtaining this M matrix, we perform an eigenvalue decomposition. $M = UKU^{T}$. Then, we define two matrices $\hat{U}$ and $\hat{A}$. $\hat{U} = Uinv(K^{1/2})$ and $\hat{A} = \hat{U}^TA\hat{U}$. Then, we diagonalize the matrix $\hat{A}$, and have $\hat{A} = VLV^{T}$. Lastly, we obtain a matrix W, $W = \hat{U}V = Uinv(K^{1/2})V$. In doing those four steps, we have essentially performed a change of basis such that $W^{T}MW = I$ and $W^TAW = L$, where A is the dynamics matrix in the LTI dynamical system. We are now able to write down an analytical expression for the observability gramian, 
+\begin{algorithm}[H]
+\SetAlgoLined
+Given $max\_sensor$\\
+Set $selected\_obs$ as an empty set. \\
+ \For{i = 0,1,2,...$max\_sensor$}{
+ \For{j not in $selected\_obs$ }{
+ 1.Compute the observability gramian associated with the j sensor location.\\
+ 2.Diagonalize the observability gramian.\\
+ 3.Compute the log determinant objective.\\ 
+ }
+ 1. Select the ith sensor location based on the maximum value of the log determinant of the observability gramian. \\
+ 2. Add this selected sensor to $selected\_obs$ 
+ }
+ \caption{Base Algorithm for Optimal Sensor Placement}
+\end{algorithm}
+
+We will later show that this algorithm indeed performs better than random sensor placement. A major drawback of this algorithm is its time complexity. We have to compute the observability gramian and diagonalize it for approximately n times, if the system is discretized into n spatial points, for each new optimal sensor locations. So, the time complexity for a new sensor is $\mathcal{O}(n^4)$, which is prohibitively expansive. 
+
+We will now present a new algorithm based on this base algorithm but take advantage of a low rank structure when computing the observability gramian. We will start by presenting a method to compute the observability gramian explicitly. Then, we will explore the low rank structure. Finally, we will present a fast algorithm for optimal sensor placement when situations can allow for this low rank exploitation. 
+
+\subsection{Computing observability gramian} We start with the M matrix from the LTI dynamical system in equation 3.1, which is a symmetric positive definite matrix with size n by n. Usually, this M matrix is the mass matrix after discretizing a differential equation, and the size of the M matrix corresponds to the number of spatial discretization points. After obtaining this M matrix, we perform an eigenvalue decomposition. $M = UKU^{T}$. Then, we define two matrices $\hat{U}$ and $\hat{A}$. $\hat{U} = U(K^{-1/2})$ and $\hat{A} = \hat{U}^TA\hat{U}$. Then, we diagonalize the matrix $\hat{A}$, and have $\hat{A} = VLV^{T}$. Lastly, we obtain a matrix W, $W = \hat{U}V = U(K^{-1/2})V$. In doing those four steps, we have essentially performed a change of basis such that $W^{T}MW = I$ and $W^TAW = L$, where A is the dynamics matrix in the LTI dynamical system. We are now able to write down an analytical expression for the observability gramian, 
 \begin{equation}
-Observability ~ Gramian (OG) = W\int_{0}^{\infty} exp(Lt)W^TC^TMCWexp(Lt) dt ~ W^{T}\\
+Observability ~ Gramian (Q) = W\int_{0}^{\infty} e^{Lt}W^TC^TMCWe^{Lt} dt ~ W^{T}\\
 \end{equation}
-Recall the C matrix is the observation operator in the LTI dynamical system. For a more detailed treatment of those steps and the integral form of the observability gramian, we recommend this reference \cite{analytical-og}. 
+Recall the C matrix is the observation operator in the LTI dynamical system. For a more detailed treatment of those steps and the integral form of the observability gramian, we recommend this reference \cite{analytical-og}.
+
+For a situation where we can easily compute the observability gramian analytically, We want to demonstrate that the observability gramian is invertible even when we only have partial access to observed data. For this analytical situation, we assume that both A and M have the same eigenvectors. In this case, we have $M=UKU^{T}$ and $\hat{U} = UK^{-1/2}$ as before. Because A and M share the same eigenvectors, $\hat{A}$ will be a diagonal matrix and $\hat{A} = K^{-1/2} D K^{-1/2}$. V becomes the identity matrix. $W = \hat{U}$. Let $C = e_m e_m^T$, representing a single sensor at the mth location of a uniform grid from discretization. Then, the observability gramian is given by 
+
+% \begin{equation}
+% \begin{split}
+
+% \hat{U} \int_0^\infty \exp(Lt) \hat{U}^T e_m e_m^T M e_m e_m^T \hat{U} \exp(Lt) dt \hat{U}^T\\
+
+% = U K^{-1/2} \int_0^\infty \exp(Lt) K^{-1/2} u_m M_{mm} u_m^T K^{-1/2} \exp(Lt) dt K^{-1/2} U^T\\
+
+% = M_{mm} U K^{-1} \int_0^\infty \exp(Lt) u_m u_m ^T \exp(Lt) dt K^{-1} U^T\\
+
+% = M_{mm} U K^{-1} diag(u_m) \int_0^\infty vec(\exp(Lt)) vec(\exp(Lt))^T dt diag(u_m) K^{-1/2} U^T\\
+
+% = M_{mm} U K^{-1} diag(u_m) [1/(\lambda_i + \lambda_j)]  diag(u_m) K^{-1/2} U^T.
+
+% \end{split}
+% \end{equation}
+
+\begin{equation}
+    \begin{split}
+&Q = \hat{U} \int_0^\infty \exp(Lt) \hat{U}^T e_m e_m^T M e_m e_m^T \hat{U} \exp(Lt) dt ~\hat{U}^T\\
+&= U K^{-1/2} \int_0^\infty \exp(Lt) K^{-1/2} u_m M_{mm} u_m^T K^{-1/2} \exp(Lt) dt ~K^{-1/2} U^T\\
+&= M_{mm} U K^{-1} \int_0^\infty \exp(Lt) u_m u_m ^T \exp(Lt) dt ~K^{-1} U^T\\
+&= M_{mm} U K^{-1} diag(u_m) \int_0^\infty vec(\exp(Lt)) vec(\exp(Lt))^T dt ~ diag(u_m) K^{-1/2} U^T\\
+&= M_{mm} U K^{-1} diag(u_m) [1/(\lambda_i + \lambda_j)]  diag(u_m) K^{-1/2} U^T.
+    \end{split}
+\end{equation}
+$u_m$ means the mth eigenvector of the mass matrix M. $M_{mm}$ means the mth diagonal entry of the mass matrix M. $diag(u_m)$ is a diagonal matrix whose diagonal is filled with the vector $u_m$. vec(exp(Lt) is a vector generated by the diagonal of the exp(Lt) matrix. Finally, $[1/(\lambda_i + \lambda_j)] $ is a matrix whose ijth entry consists of the ith and jth eigenvalue of the A matrix. From control theory, we know $diag(u_m)$ will be invertible unless there is an eigenvector v of A such that Cv = 0. And $[1/(\lambda_i + \lambda_j)] $ is likely to be full rank. Therefore, we know the observability gramian is full rank and can be invertible. 
 
 
-
-\subsection{Low rank structure of the observability gramian} We have empirically observed that there is a numerically low rank structure within the observability gramian. The numerically low rank structure comes from that the L matrix described in section 4.1 is diagonal and its diagonal entries decay rather quickly. For example, suppose the LTI dynamical system is obtained by applying the finite element discretization scheme on the 1-D heat equation. Suppose the spatial dimension extends from [0,1]. Let's denote $x_{i}$ by $x_{i} = ih$ with h = $\frac{1}{n+1}$ for i = 0,1,...n+1 the mesh along the spatial dimension. Let the basis function be 
+\subsection{Low rank structure of the observability gramian} We have empirically observed that there is a numerically low rank structure within the observability gramian. The numerically low rank structure comes from that the L matrix described in section 4.3 is diagonal and its diagonal entries decay rather quickly. For example, suppose the LTI dynamical system is obtained by applying the finite element discretization scheme on the 1-D heat equation. Suppose the spatial dimension extends from [0,1]. Let's denote $x_{i}$ by $x_{i} = ih$ with h = $\frac{1}{n+1}$ for i = 0,1,...n+1 the mesh along the spatial dimension. Let the basis function be 
 
 \[
   \phi(x) =
@@ -395,27 +493,23 @@ We noticed that the magnitude of the entries near the (0,0) location far exceeds
 \subsection{Additive relation of the observability gramian} There is an additive relation of the observability gramian. Namely, when we add a new sensor to an existing set of sensors, we can write the observability gramian of the combined set as the addition of the observability gramian of the existing set and the observability gramian of the new sensor. For the observation operator, C, we will use $C_{old}$ to denote the effect of the existing set of sensors, and $C_{new}$ to denote the effect of a new sensor. 
 
 \begin{equation}
-\begin{aligned}
-& & OG = W\int_{0}^{\infty} exp(Lt)W^T(C_{old}+C_{new})^TM(C_{old}+C_{new})Wexp(Lt) dt ~ W^{T}\\
-\end{aligned}
+\begin{split}
+&Q = W\int_{0}^{\infty} e^{Lt}W^T(C_{old}+C_{new})^TM(C_{old}+C_{new})We^{Lt} dt ~ W^{T} \\
+&~= W\int_{0}^{\infty} e^{Lt}W^TC_{old}^TMC_{old}We^{Lt} dt ~ W^{T}\\
+&~~~~+W\int_{0}^{\infty} e^{Lt}W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})We^{Lt} dt ~ W^{T}\\
+\end{split}
 \end{equation}
 
-\begin{equation}
-\begin{aligned}
-& OG = W\int_{0}^{\infty} exp(Lt)W^TC_{old}^TMC_{old}Wexp(Lt) dt ~ W^{T}\\
-& +W\int_{0}^{\infty} exp(Lt)W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})Wexp(Lt) dt ~ W^{T}\\
-\end{aligned}
-\end{equation}
 
-Because the observability gramian is a symmetric positive definite matrix, the singular values are identical to eigenvalues. Therefore, when we compute the log determinant of the observability gramian, we can first compute the singular values. Suppose we are in an iteration of the greedy algorithm and we know the singular value decomposition of the observability gramian of the existing set of sensors. 
+Because the observability gramian is a symmetric positive definite matrix, the singular values are identical to eigenvalues. Therefore, when we compute the log determinant of the observability gramian, we can compute the singular values. Suppose we are in an iteration of the greedy algorithm and we know the singular value decomposition of the observability gramian of the existing set of sensors. 
 \begin{equation}
-    U_{old}S_{old}V_{old} = W\int_{0}^{\infty} exp(Lt)W^TC_{old}^TMC_{old}Wexp(Lt) dt ~ W^{T}
+    U_{old}S_{old}V_{old} = W\int_{0}^{\infty} e^{Lt}W^TC_{old}^TMC_{old}We^{Lt} dt ~ W^{T}
 \end{equation}
 To compute the effect of a new sensor on the observability gramian, and therefore on the objective function, we really need to just compute the following integral, which we denote as $Integral_{update}$
 \begin{equation}
 \begin{aligned}
-&&Integral_{update} = \int_{0}^{\infty} exp(Lt)W^T(C_{new}^TMC_{new}+\\
-&&C_{new}^TMC_{old}+C_{old}^TMC_{new})Wexp(Lt) dt. 
+&&Integral_{update} = \int_{0}^{\infty} e^{Lt}W^T(C_{new}^TMC_{new}+\\
+&&C_{new}^TMC_{old}+C_{old}^TMC_{new})We^{Lt} dt. 
 \end{aligned}
 \end{equation}
 Then, 
@@ -438,73 +532,74 @@ So, the idea is that instead of solving the observability gramian from scratch e
 \subsection{Fast algorithms} We can now exploit both the additive relation and the low rank structure, especially in the context of the greedy algorithm. Because from one iteration to the next iteration of the greedy algorithm, only one new sensor is added.
 So, we can use the SVD update structure described before. The greedy algorithm and the additive relation go hand in hand together for a fast algorithm. We can further accelerate the algorithm for optimal sensor placement in large systems by taking advantage of the numerical low rank structure of the $Integral_{update}$ term. 
 
-\subsubsection{Using top eigenvalues}
-Naturally, for a large system, the objective is the log determinant of the top H eigenvalues. If we want to get a rather accurate approximation of the top H eigenvalues, we want to compute more than just a H by H matrix starting with the (0,0) entry for the $Integral_{update}$ term. We want to compute more than just the first H by H entries. We introduce a parameter $n_{integral}$ to denote the number of entries of the integral we want to compute explicitly starting from the (0,0) entry. For a LTI dynamical system with n spatial discretization points, we propose the following algorithm for efficiently selecting $n_{sensor}$ sensors. 
+% \subsubsection{Using top eigenvalues}
+% Naturally, for a large system, the objective is the log determinant of the top H eigenvalues. If we want to get a rather accurate approximation of the top H eigenvalues, we want to compute more than just a H by H matrix starting with the (0,0) entry for the $Integral_{update}$ term. We want to compute more than just the first H by H entries. We introduce a parameter $n_{integral}$ to denote the number of entries of the integral we want to compute explicitly starting from the (0,0) entry. For a LTI dynamical system with n spatial discretization points, we propose the following algorithm for efficiently selecting $n_{sensor}$ sensors. 
 
 
-\begin{algorithm}[H]
-\SetAlgoLined
- Given $n_{integral}$, $n_{sensor}$\\
-1. Set $selected\_obs$ as an empty set. \\
-2. $M = UKU^{T}$, $\hat{U} = Uinv(K^{1/2})$, $\hat{A} = \hat{U}^{T}A\hat{U}$, $\hat{A} = VLV^{T}$, $W = \hat{U}V $\\
-3. Select the first $n_{integral}$ number of columns of W and denote this as $W_{truncated}$\\
-4. Initialize $U_{old}$ as a zero matrix of size n by $n_{integral}$. Fill the main diagonal of $U_{old}$ with 1s. Initialize $S_{old}$ as a zero matrix of size $n_{integral}$ by $n_{integral}$. Initialize $V_{old}$ exactly as $U_{old}$.\\
+% \begin{algorithm}[H]
+% \SetAlgoLined
+%  Given $n_{integral}$, $n_{sensor}$\\
+% 1. Set $selected\_obs$ as an empty set. \\
+% 2. $M = UKU^{T}$, $\hat{U} = Uinv(K^{1/2})$, $\hat{A} = \hat{U}^{T}A\hat{U}$, $\hat{A} = VLV^{T}$, $W = \hat{U}V $\\
+% 3. Select the first $n_{integral}$ number of columns of W and denote this as $W_{truncated}$\\
+% 4. Initialize $U_{old}$ as a zero matrix of size n by $n_{integral}$. Fill the main diagonal of $U_{old}$ with 1s. Initialize $S_{old}$ as a zero matrix of size $n_{integral}$ by $n_{integral}$. Initialize $V_{old}$ exactly as $U_{old}$.\\
 
-\For{i = 0,1,2,...$n_{sensor}$}{\\
-1. Do a QR decomposition, $PR_{A} = (I-U_{old}U_{old}^{T})W_{truncated}$ \\
-2. Form $K_{left}$ as 
-\left( \begin{array}{cc}
-I & U_{old}^{T}W_{truncated} \\
-0 & R_{A}
-\end{array} \right)\\
+% \For{i = 0,1,2,...$n_{sensor}$}{\\
+% 1. Do a QR decomposition, $PR_{A} = (I-U_{old}U_{old}^{T})W_{truncated}$ \\
+% 2. Form $K_{left}$ as 
+% \left( \begin{array}{cc}
+% I & U_{old}^{T}W_{truncated} \\
+% 0 & R_{A}
+% \end{array} \right)\\
 
 
-3. Do a QR decomposition, $QR_{B} = (I-V_{old}V_{old}^{T})W_{truncated}$\\
-4. Form $K_{right}$ as 
-\left( \begin{array}{cc}
-I & V_{old}^{T}W_{truncated} \\
-0 & R_{B}
-\end{array} \right)\\
+% 3. Do a QR decomposition, $QR_{B} = (I-V_{old}V_{old}^{T})W_{truncated}$\\
+% 4. Form $K_{right}$ as 
+% \left( \begin{array}{cc}
+% I & V_{old}^{T}W_{truncated} \\
+% 0 & R_{B}
+% \end{array} \right)\\
 
-\For{j = 0,1,2,...n}{
-\If{j not in set $selected\_obs$}{
-1. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ and denote the result as $I_{low ~ rank}$.\\
-2. Compute K. K = $K_{left}$
-\left( \begin{array}{cc}
-S_{old} & 0 \\
-0 & I_{low ~ rank}
-\end{array} \right)
-$K_{right}^{T}$\\
-3. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
-4. Select the top H singular values of S' and compute the objective. \\
-5. Record the objective function value for this sensor location. \\
-}
-}
-5. Find the new sensor location. Denote this location as $j_{new sensor}$\\
-6. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ based on $j_{new sensor}$. Denote the result as $I_{low ~ rank}$.\\
-7. Compute K. K = $K_{left}$
-\left( \begin{array}{cc}
-S_{old} & 0 \\
-0 & I_{low ~ rank}
-\end{array} \right)
-$K_{right}^{T}$\\
-8. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
-9. Set $U_{old}$ as the first $n_{integral}$ columns of $[U_{old} P]U'$. \\
-10. Set $S_{old}$ as the first the first $n_{integral}$ by $n_{integral}$ entries of $S'$\\
-11. Set $V_{old}$ as the first  $n_{integral}$ columns of $[V_{old} Q]V'$. \\
-12. Add $j_{new sensor}$ to the set $selected\_obs$
-}
- \caption{Fast Algorithm for Log Determinant of Top H Eigenvalues}
-\end{algorithm}
+% \For{j = 0,1,2,...n}{
+% \If{j not in set $selected\_obs$}{
+% 1. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ and denote the result as $I_{low ~ rank}$.\\
+% 2. Compute K. K = $K_{left}$
+% \left( \begin{array}{cc}
+% S_{old} & 0 \\
+% 0 & I_{low ~ rank}
+% \end{array} \right)
+% $K_{right}^{T}$\\
+% 3. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
+% 4. Select the top H singular values of S' and compute the objective. \\
+% 5. Record the objective function value for this sensor location. \\
+% }
+% }
+% 5. Find the new sensor location. Denote this location as $j_{new sensor}$\\
+% 6. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ based on $j_{new sensor}$. Denote the result as $I_{low ~ rank}$.\\
+% 7. Compute K. K = $K_{left}$
+% \left( \begin{array}{cc}
+% S_{old} & 0 \\
+% 0 & I_{low ~ rank}
+% \end{array} \right)
+% $K_{right}^{T}$\\
+% 8. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
+% 9. Set $U_{old}$ as the first $n_{integral}$ columns of $[U_{old} P]U'$. \\
+% 10. Set $S_{old}$ as the first the first $n_{integral}$ by $n_{integral}$ entries of $S'$\\
+% 11. Set $V_{old}$ as the first  $n_{integral}$ columns of $[V_{old} Q]V'$. \\
+% 12. Add $j_{new sensor}$ to the set $selected\_obs$
+% }
+%  \caption{Fast Algorithm for Log Determinant of Top H Eigenvalues}
+% \end{algorithm}
 
-For the two QR decompositions, both $(I-U_{old}U_{old}^{T})W_{truncated}$ and its counterpart $(I-V_{old}V_{old}^{T})W_{truncated}$ have size n by $n_{integral}$. So, the time complexity for the QR decomposition is $\mathcal{O}(nn_{integral}^2)$. For the inner for loop, usually there are some structures for computing $W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})W$. So the cost of computing $I_{low ~ rank}$ is $\mathcal{O}(n_{integral}^2)$. The cost of forming K in the inner loop is $\mathcal{O}((2n_{integral})^3)$. The cost of SVD decomposition is $\mathcal{O}((2n_{integral})^3)$. After finding a new optimal sensor location, the cost of forming K again is $\mathcal{O}((2n_{integral})^3)$, and then we have to perform one more SVD decomposition, which costs $\mathcal{O}((2n_{integral})^3)$. Since we only need the first $n_{integral}$ columns of  $[U_{old} P]U'$, the cost of update $U_{old}$ is  $\mathcal{O}(n2n_{integral}n_{integral})$
+% For the two QR decompositions, both $(I-U_{old}U_{old}^{T})W_{truncated}$ and its counterpart $(I-V_{old}V_{old}^{T})W_{truncated}$ have size n by $n_{integral}$. So, the time complexity for the QR decomposition is $\mathcal{O}(nn_{integral}^2)$. For the inner for loop, usually there are some structures for computing $W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})W$. So the cost of computing $I_{low ~ rank}$ is $\mathcal{O}(n_{integral}^2)$. The cost of forming K in the inner loop is $\mathcal{O}((2n_{integral})^3)$. The cost of SVD decomposition is $\mathcal{O}((2n_{integral})^3)$. After finding a new optimal sensor location, the cost of forming K again is $\mathcal{O}((2n_{integral})^3)$, and then we have to perform one more SVD decomposition, which costs $\mathcal{O}((2n_{integral})^3)$. Since we only need the first $n_{integral}$ columns of  $[U_{old} P]U'$, the cost of update $U_{old}$ is  $\mathcal{O}(n2n_{integral}n_{integral})$
 
-So, the most computation expensive part of the inner for loop is forming the K matrix and computing its SVD. In general, we have to repeat this process n times for a new sensor iteration. So, the total time complexity of finding one more new sensor for this algorithm is bounded above by $\mathcal{O}(nn_{integral}^2+n((2n_{integral})^3))$, where the first term comes from the QR decompositive and the second term comes from the inner loop of the algorithm. One should note that if the objective is the log determinant of top H eigenvalues, then $n_{integral} \ll n$. 
+% So, the most computation expensive part of the inner for loop is forming the K matrix and computing its SVD. In general, we have to repeat this process n times for a new sensor iteration. So, the total time complexity of finding one more new sensor for this algorithm is bounded above by $\mathcal{O}(nn_{integral}^2+n((2n_{integral})^3))$, where the first term comes from the QR decompositive and the second term comes from the inner loop of the algorithm. One should note that if the objective is the log determinant of top H eigenvalues, then $n_{integral} \ll n$. 
 
 \subsubsection{Predefined subspace}
-Sometimes, we may not be interested in using the top H eigenvalues of the observability gramian as the objective function. For instance, we may want to reproduce the learned initial conditions. Sometimes we are restricted by the types of equipment we have at our disposal and can only reproduce certain kinds of initial conditions. For instances like this and other similar cases, we want to project the observability gramian into a predefined subspace and use the log determinant of the observability gramian projected into this predefined subspace as the objective function for determining optimal sensor location. 
+Sometimes, we may want to solve the optimal sensor placement problem in a predefined subspace. For instance, we may want to reproduce the learned initial conditions in some experimental setting. Sometimes we are restricted by the types of equipment we have at our disposal and can only reproduce certain kinds of initial conditions. For instances like this, we want to project the observability gramian into a subspace defined by the equipments and use the log determinant of the observability gramian projected into this predefined subspace as the objective function for determining optimal sensor locations. 
 
-Suppose G is an orthonormal basis for a g-dimensional subspace of $R^{n}$. We want to use $logdet(G^{T}~OG~G)$ as the objective function, where OG is shorthand for observability gramian. There is a nice connection between using $logdet(G^{T}~OG~G)$ as the objective function and using log determinant of the top H eigenvalues of the observability gramian as the objective function. Suppose we can diagonalize the observability gramian in the G basis, $OG = GDG^{T}$. Now, we select the top H eigenvectors and form a n by H matrix by stacking the selected eigenvectors column by column. Let's denote this matrix as $G_{H}$. Now, the general expression $logdet(G^{T}~OG~G)$ becomes $logdet(G_{H}^{T}~GDG^{T}~G_{H})$. Because the orthogonality property of G, $logdet(G_{H}^{T}~GDG^{T}~G_{H})$ is computing the log determinant of the top H eigenvalues of the observability gramian.
+Suppose G is an orthonormal basis for a g-dimensional subspace of $R^{n}$. We want to use $logdet(G^{T}~Q~G)$ as the objective function, where Q is the observability gramian. 
+% There is a nice connection between using $logdet(G^{T}~OG~G)$ as the objective function and using log determinant of the top H eigenvalues of the observability gramian as the objective function. Suppose we can diagonalize the observability gramian in the G basis, $OG = GDG^{T}$. Now, we select the top H eigenvectors and form a n by H matrix by stacking the selected eigenvectors column by column. Let's denote this matrix as $G_{H}$. Now, the general expression $logdet(G^{T}~OG~G)$ becomes $logdet(G_{H}^{T}~GDG^{T}~G_{H})$. Because the orthogonality property of G, $logdet(G_{H}^{T}~GDG^{T}~G_{H})$ is computing the log determinant of the top H eigenvalues of the observability gramian.
 
 \begin{algorithm}[H]
 \SetAlgoLined
@@ -512,8 +607,8 @@ Suppose G is an orthonormal basis for a g-dimensional subspace of $R^{n}$. We wa
 1. Set $selected\_obs$ as an empty set. \\
 2. $M = UKU^{T}$, $\hat{U} = Uinv(K^{1/2})$, $\hat{A} = \hat{U}^{T}A\hat{U}$, $\hat{A} = VLV^{T}$, $W = \hat{U}V $\\
 3. Compute $W_{projected}' = G^{T}W$. Then, select the first $n_{integral}$ number of columns of $W_{projected}'$ and denote this as $W_{projected}$\\
-4. Create a zero matrix Z of size g by g and initialize $U_{old}S_{old}V_{old}' = SVD(Z)$
-
+4. Initialize $U_{old}, S_{old}, V_{old}^{T}$ such that $U_{old}S_{old}V_{old}^{T} = SVD(Z)$, where Z is a zero matrix of g by g. \\
+%\vspace{2mm} %2mm vertical space
 \For{i = 0,1,2,...$n_{sensor}$}{\\
 1. Do a QR decomposition, $PR_{A} = (I-U_{old}U_{old}^{T})W_{projected}$ \\
 2. Form $K_{left}$ as 
@@ -530,19 +625,17 @@ I & V_{old}^{T}W_{truncated} \\
 0 & R_{B}
 \end{array} \right)\\
 
-\For{j = 0,1,2,...n}{\\
-\If{j not in set $selected\_obs$}{
+\For{j not in  $selected\_obs$}{\\
 1. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ and denote the result as $I_{low ~ rank}$.\\
-2. Compute K. K = $K_{left}$
+2. Compute K'. K' = $K_{left}$
 \left( \begin{array}{cc}
 S_{old} & 0 \\
 0 & I_{low ~ rank}
 \end{array} \right)
 $K_{right}$\\
-3. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
+3. Compute a SVD decomposition of K'. $U'S'V'^{T} = K'$\\
 4. Select the top g singular values of S' and compute the objective. \\
 5. Record the objective function value for this sensor location. \\
-}
 }
 5. Find the new sensor location. Denote this location as $j_{new ~ sensor}$\\
 6. Compute the first $n_{integral}$ by $n_{integral}$ entries of $Integral_{update}$ based on $j_{new~sensor}$. Denote the result as $I_{low ~ rank}$.\\
@@ -552,19 +645,19 @@ S_{old} & 0 \\
 0 & I_{low ~ rank}
 \end{array} \right)
 $K_{right}$\\
-8. Compute a SVD decomposition of K. $U'S'V'^{T} = K$\\
-9. Set $U_{old}$ as the first $n_{integral}$ columns of $[U_{old} P]U'$. \\
-10. Set $S_{old}$ as the first the first $n_{integral}$ by $n_{integral}$ entries of $S'$\\
-11. Set $V_{old}$ as the first  $n_{integral}$ columns of $[V_{old} Q]V'$. \\
+8. Compute a SVD decomposition of K. $USV^{T} = K$\\
+9. Set $U_{old}$ as the first $n_{integral}$ columns of $[U_{old} P]U$. \\
+10. Set $S_{old}$ as the first the first $n_{integral}$ by $n_{integral}$ entries of $S$\\
+11. Set $V_{old}$ as the first  $n_{integral}$ columns of $[V_{old} Q]V$. \\
 12. Add $j_{new sensor}$ to the set $selected\_obs$
 }
 
- \caption{Fast Algorithm for $logdet(G^{T}~OG~G)$}
+ \caption{Fast Algorithm for $logdet(G^{T}~Q~G)$}
 \end{algorithm}
 
-For the two QR decompositions, both $(I-U_{old}U_{old}^{T})W_{projected}$ and its counterpart $(I-V_{old}V_{old}^{T})W_{projected}$ have size g by $n_{integral}$. So, the time complexity for the QR decomposition is $\mathcal{O}(gn_{integral}^2)$. For the inner for loop, usually there are some structures for computing $W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})W$. So the cost of computing $I_{low ~ rank}$ is $\mathcal{O}(n_{integral}^2)$. The cost of forming K in the inner loop is $\mathcal{O}(2g(g+n_{integral})2g)$. The cost of SVD decomposition is $\mathcal{O}((2g)^3)$. After finding a new optimal sensor location, the cost of forming K again is $\mathcal{O}(2g(g+n_{integral})2g)$, and then we have to perform one more SVD decomposition, which costs $\mathcal{O}((2g)^3)$. Since we only need the first $n_{integral}$ columns of  $[U_{old} P]U'$, the cost of update $U_{old}$ is  $\mathcal{O}(2g^{3})$
+For the two QR decompositions, both $(I-U_{old}U_{old}^{T})W_{projected}$ and its counterpart $(I-V_{old}V_{old}^{T})W_{projected}$ have size g by $n_{integral}$. So, the time complexity for the QR decomposition is $\mathcal{O}(gn_{integral}^2)$. For the inner for loop, usually there are some structures for computing $W^T(C_{new}^TMC_{new}+C_{new}^TMC_{old}+C_{old}^TMC_{new})W$. So the time complexity of computing this term can be made to $\mathcal{O}(n)$. So the cost of computing $I_{low ~ rank}$ is $\mathcal{O}(n_{integral}^2n)$. The cost of forming K in the inner loop is $\mathcal{O}(2g(g+n_{integral})2g)$. The cost of SVD decomposition is $\mathcal{O}((2g)^3)$. After finding a new optimal sensor location, the cost of forming K again is $\mathcal{O}(2g(g+n_{integral})2g)$, and then we have to perform one more SVD decomposition, which costs $\mathcal{O}((2g)^3)$. Since we only need the first $n_{integral}$ columns of  $[U_{old} P]U'$, the cost of update $U_{old}$ is  $\mathcal{O}(2g^{3})$
 
-So, the most computation expensive part of the inner for loop is forming the K matrix and computing its SVD. In general, we have to repeat this process n times for a new sensor iteration. So, the total time complexity of finding one more new sensor for this algorithm is bounded above by $\mathcal{O}(gn_{integral}^2+n(4g^{2}(g+n_{integral})))$, where the first term comes from the QR decompositive and the second term comes from the inner loop of the algorithm. Typically, g is a very small number, and $n_{integral} \ll n$. 
+So, the most computation expensive part of the inner for loop is forming the K matrix and computing its SVD. In general, we have to repeat this process n times for a new sensor iteration. So, the total time complexity of finding one more new sensor for this algorithm is bounded above by $\mathcal{O}(gn_{integral}^2+n(4g^{2}(g+n_{integral})))$, where the first term comes from the QR decompositive and the second term comes from the inner loop of the algorithm.
 
 \section{Experimental results}
 \subsection{Heat equation} We are interested in learning the initial condition of the 1-D heat equation, and the problem can be formulated as the following:
@@ -580,7 +673,7 @@ So, the most computation expensive part of the inner for loop is forming the K m
 \end{aligned}
 \end{equation}
 
-There are three equations acing as the constraint to this constrained minimization problem. The 1-D heat equation is , ${\partial t} X(t,x) = k{\Delta X (t,x)}$, there the scalar k is the diffusivity of the medium. This differential equation is paired with a Robin boundary condition, $\frac{\partial X(t,x)}{\partial n} = \gamma(U(t,x)-X(t,x))$, where U describes the temperature at the two ends of this 1-D rod, or boundary control, and $\gamma$ describe the diffusivity at the ends of the 1-D rod. The initial condition for this 1-D heat equation is $X(0,x) = X_{0}(x)$. 
+There are three equations acting as the constraints to this constrained minimization problem. The 1-D heat equation is , ${\partial t} X(t,x) = k{\Delta X (t,x)}$. The scalar k is the diffusivity of the medium. This differential equation is paired with a Robin boundary condition, $\frac{\partial X(t,x)}{\partial n} = \gamma(U(t,x)-X(t,x))$, where U describes the temperature at the two ends of this 1-D rod, and $\gamma$ describes the diffusivity at the ends of the 1-D rod. The initial condition for this 1-D heat equation is $X(0,x) = X_{0}(x)$. 
 
 To arrive at the weak form, we multiply both sides of the PDE by a sufficiently regular test function, $V(x)$, integrate by parts, and we arrive at:
 \begin{center}
@@ -588,7 +681,7 @@ To arrive at the weak form, we multiply both sides of the PDE by a sufficiently 
 \begin{split}
     \int_D {\partial t} X(t,x) V(x) dx + \int_D K <\nabla X(t,x),\nabla V(x)> dx
     + \int_{\partial D} k \gamma X(t,x)V(x) dx \\
-    = - \int_{\partial D} k \gamma U(t,x)V(x) dx 
+    = \int_{\partial D} k \gamma U(t,x)V(x) dx .
 \end{split}
 \end{equation}
 \end{center}
@@ -603,12 +696,12 @@ Suppose the spatial dimension extends from [0,1]. Let's denote $x_{i}$ by $x_{i}
   0 & \text{otherwise}
   \end{cases}
 \]
-translated and scaled to interpolate at the mesh vertices $x_{i}$. That is, $\phi_{i}(x) = \phi(\frac{x-x_{i-1}}{x_{i}-x_{i-1}})$ We associate with the mesh vertices $x_{0}$ and $x_{n+1}$ the one-sided hat functions, $\psi$. We approximate the heat equation solution and the boundary control as
+translated and scaled to interpolate at the mesh vertices $x_{i}$. That is, $\phi_{i}(x) = \phi(\frac{x-x_{i-1}}{x_{i}-x_{i-1}})$. We associate with the mesh vertices $x_{0}$ and $x_{n+1}$ the one-sided hat functions, $\psi$. We approximate the heat equation solution and the boundary control as
 
 
 \begin{equation}
 \begin{aligned}
-    X &= \sum_{i = 0}^{n+1} x_{i}\phi_{i}           &  U &= \sum_{i = 0}^{1} u_{i}\psi_{i}
+    X &= \sum_{i = 0}^{n+1} x_{i}\phi_{i}           &  U &= \sum_{i = 0}^{1} u_{i}\psi_{i}.
 \end{aligned}
 \end{equation}
 
@@ -622,16 +715,12 @@ Substituting the approximation expression into the weak form, and setting $V(x) 
     + \sum_{i = 0}^{1}u_{i}\gamma\int_{\partial_{D}} \phi_{i}(x) \phi_{j}(x)  dx
 \end{aligned}
 \end{equation}
-
-
-
 for j = 0,1,...,n+1. This results in the system of differential equations
 
 \begin{equation}
     M\dot{X} = AX + BU
 \end{equation}
-
-where M $\in \mathbb{R}^{(n+2)*(n+2)}$,A $\in \mathbb{R}^{(n+2)*(n+2)}$, and B $\in \mathbb{R}^{(n+2)*(2)}$ are
+where M $\in \mathbb{R}^{(n+2)\times (n+2)}$,A $\in \mathbb{R}^{(n+2)\times (n+2)}$, and B $\in \mathbb{R}^{(n+2)\times (2)}$ are
 \begin{equation}
     M_{ij} = \int_{D} \phi_{i}(x) \phi_{j}(x)  dx
 \end{equation}
@@ -642,7 +731,7 @@ where M $\in \mathbb{R}^{(n+2)*(n+2)}$,A $\in \mathbb{R}^{(n+2)*(n+2)}$, and B $
 \end{equation}
 and 
 \begin{equation}
-    B_{ij} = \gamma\int_{\partial_{D}} \phi_{i}(x) \phi_{j}(x)  dx
+    B_{ij} = \gamma\int_{\partial_{D}} \phi_{i}(x) \phi_{j}(x)  dx.
 \end{equation}
  
  We then approximate the time dimension of the differential equation, $M\dot{X} = AX + BU$, by the $\theta-method$. Let $0<t_{0}<t_{1}...<t_{N}<t_{N+1} = 1$ denote a partition of the time dimension spanning [0,1], where $t_{i} = i\delta t$ and $\delta t = \frac{1}{N+1}$. The $\theta-method$ results in 
@@ -654,67 +743,92 @@ and
 After approximating the constraint differential equation, we now approximate the objective function. The approximation is
 \begin{equation}
 \begin{split}
-& \frac{1}{2} \delta t \bigg\{  (1-\theta) (x_{0}-y_{0})^\top C^\top M C (x_{0}-y_{0})\\
-&  + \sum_{i=1}^{N} (x_{i}-y_{i})^\top C^\top M C (x_{i}-y_{i}) \\
-&  + \theta (x_{N+1}-y_{N+1})^\top C^\top M C (x_{N+1}-y_{N+1}) \bigg\} \\
+& \frac{1}{2} \delta t \bigg\{  (1-\theta) (x_{0}-y_{obs,0})^\top C^\top M C (x_{0}-y_{obs,0})\\
+&  + \sum_{i=1}^{N} (x_{i}-y_{obs,i})^\top C^\top M C (x_{i}-y_{obs,i}) \\
+&  + \theta (x_{N+1}-y_{obs,N+1})^\top C^\top M C (x_{N+1}-y_{obs,N+1}) \bigg\} \\
 & + \frac{\alpha}{2} u_{0}^\top M u_{0}
 \end{split}
 \end{equation}
 
-After setting up the proper differential equation and the objective function in the chosen basis, we need to determine where the optimal sensor locations are. The basis functions are localized hat functions translated and scaled on [0,1], so mathematically the optimal sensor problem is represented by determining which entries on the diagonal of the C matrix are 1s and which are 0s. For this numerical experiment, we discretize the 1-D rod on [0,1] to 300 interior points, and we want to choose the optimal sensor locations for the first 40 sensors First, we are going to demonstrate the result of the fast algorithm when the objective function for choosing optimal sensor location is log det of top H eigenvalues. In general, the eigenvalues of the observability gramian decays exceedingly quickly. Here, we have plotted the eigenvalues of the observability gramian for randomly selecting $20\%$ of discretized points for this example. 
+After setting up the proper differential equation and the objective function in the chosen basis, we want to demonstrate that choosing sensor locations based on log det of the observability gramian for learning initial conditions is better than random placement. For the numerical experiments, we discretize the 1-D rod into 100 interior points. We set the ground truth of the initial condition to be $20*sin(8\pi x)+cos(2\pi x)$. We set the additive noise to be gaussian with 0 mean and standard deviation of 2. We are interested in the frobenius norm of the difference between the recovered initial condition based on random sensor placement and the noiseless true initial condition. We also want to compute the frobenius norm of the difference between the recovered initial condition based on sensors choosen by the log det objective function and the noiseless true initial condition. We plot both of those two frobenius norms as functions of sensor count. 
 
-\begin{figure}[!htb]
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{all_eig.png}
-  \caption{log of all eigenvalues}\label{fig:awesome_image1}
-\endminipage\hfill
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{top_eig.png}
-  \caption{log of top 20 eigenvalues}\label{fig:awesome_image2}
-\endminipage\hfill
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=8cm]{result_for_log_det.png}
+    \caption{Numerical experiment for demonstrating log det objective}
+    %\label{fig:galaxy}
 \end{figure}
 
-In order for the approximation to be valid, we have selected to use the log of top 10 eigenvalues as the objective, or setting H in algorithm to be 10. We have also selected to set $n_{integral}$ to be 70. The benckmark we are comparing to is by solving the generalized lyapunov equation exactly and then compute the log det of the top 10 eigenvalues based on the exact solution. 
+We can see from the graph that if we choose sensor placement based on log det of the observability gramian, then the recovered initial condition matches more closely to the noiseless true initial condition than random sensor placement, as predicted by theory. 
 
-\begin{figure}[!htb]
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{numerical_result_top_h.png}
-  \caption{Objective cutoff is top 10 eigenvalues}\label{fig:awesome_image1}
-\endminipage\hfill
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{numerical_result_given_basis.png}
-  \caption{Objective is based on given basis}\label{fig:awesome_image2}
-\endminipage\hfill
+We know one hurdle of this algorithm is its time complexity. We want to demonstrate that the proposed fast algorithm can be rather efficient in certain settings. Here, we discretize the 1-D rod with the same basis functions into 300 interior points. We randomly generate a 302 by 10 matrix with orthonormal columns, which will serve as the G matrix in algorithm 4.2. We are interested in the position of the first 40 sensors. We set $n_{integral}$ to be 130 for this numerical experiment. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=8cm]{numerical_result_given_basis.png}
+    \caption{Numerical experiment for demonstrating log det objective}
+    %\label{fig:galaxy}
 \end{figure}
 
-In another numerical experiment setting, we want to demonstrate the algorithm when a predefined subspace is given. Here, we randomly generated a 300 by 10 matrix with orthonormal columns, which will serve as the G matrix in algorithm 4.2. Because the orthonormal columns are not the top 10 eigenvectors of the observability gramian, we generally need to set $n_{integral}$ to be larger for the approximation to be good. Here, we are interested in the positions of the first 40 sensors. We set $n_{integral}$ to be 130 for this numerical experiment. 
-
-Now, we want to solve the initial condition problem by leveraging the fast algorithm. We generated an initial condition and founded the minimum number of sensors needed to recover this particular initial condition. For comparison, we ask a random number generator to select the same amount of sensors but at random positions. We then compared the quality of the recovered initial condition based on those two observation scheme. In terms of the parameters of the fast algorithm, we selected 10 sensors by setting the objective as the log det of top 10 eigenvalues. 
-
-\begin{figure}[!htb]
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{good initial condition.png}
-  \caption{Carefully selected sensor placement}\label{fig:awesome_image1}
-\endminipage\hfill
-\minipage{0.5\textwidth}
-  \includegraphics[width=\linewidth]{bad initial condition.png}
-  \caption{Randomly selected sensor placement}\label{fig:awesome_image2}
-\endminipage\hfill
-\end{figure}
+We contrast the result from the fast algorithm with result of solving the observability gramian exactly. It can be seen that the result practically lay on top of each other, indicating good approximation from the fast algorithm. 
 
 
-% With the choose basis, the explicit form of the M $\in \mathbb{R}^{(n+2)*(n+2)}$,A $\in \mathbb{R}^{(n+2)*(n+2)}$, and B $\in \mathbb{R}^{(n+2)*(2)}$ matrices are:
-% \begin{gather}
-%  M = h/6 \begin{bmatrix} 
-%  2 & 1 \\
-%  1 & 4 & 1\\
-%  \ddots & \ddots & \ddots\\
-%  && 1 & 4 & 1\\
-%  &&& 1 & 2 
-%  \end{bmatrix}
-% \end{gather}
 
-Because we are randomly selecting 10 positions out of 302 possible positions for sensor placement, sometimes the sensor placements are clustered and suboptimal. It can be seen from the right graph that maybe more sensors are needed near the right ends. However, when we are selecting sensors based on log det of observability gramian, we noticed the algorithm always places two sensors near the two ends and then place one sensor in the middle. Afterwards, the algorithm places sensors in between those points. Intuitively, this sensor placement does seem better than random placement. 
+
+% After setting up the proper differential equation and the objective function in the chosen basis, we need to determine where the optimal sensor locations are. The basis functions are localized hat functions translated and scaled on [0,1], so mathematically the optimal sensor problem is represented by determining which entries on the diagonal of the C matrix are 1s and which are 0s. For this numerical experiment, we discretize the 1-D rod on [0,1] to 300 interior points, and we want to choose the optimal sensor locations for the first 40 sensors First, we are going to demonstrate the result of the fast algorithm when the objective function for choosing optimal sensor location is log det of top H eigenvalues. In general, the eigenvalues of the observability gramian decays exceedingly quickly. Here, we have plotted the eigenvalues of the observability gramian for randomly selecting $20\%$ of discretized points for this example. 
+
+% \begin{figure}[!htb]
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{all_eig.png}
+%   \caption{log of all eigenvalues}\label{fig:awesome_image1}
+% \endminipage\hfill
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{top_eig.png}
+%   \caption{log of top 20 eigenvalues}\label{fig:awesome_image2}
+% \endminipage\hfill
+% \end{figure}
+
+% In order for the approximation to be valid, we have selected to use the log of top 10 eigenvalues as the objective, or setting H in algorithm to be 10. We have also selected to set $n_{integral}$ to be 70. The benckmark we are comparing to is by solving the generalized lyapunov equation exactly and then compute the log det of the top 10 eigenvalues based on the exact solution. 
+
+% \begin{figure}[!htb]
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{numerical_result_top_h.png}
+%   \caption{Objective cutoff is top 10 eigenvalues}\label{fig:awesome_image1}
+% \endminipage\hfill
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{numerical_result_given_basis.png}
+%   \caption{Objective is based on given basis}\label{fig:awesome_image2}
+% \endminipage\hfill
+% \end{figure}
+
+% In another numerical experiment setting, we want to demonstrate the algorithm when a predefined subspace is given. Here, we randomly generated a 300 by 10 matrix with orthonormal columns, which will serve as the G matrix in algorithm 4.2. Because the orthonormal columns are not the top 10 eigenvectors of the observability gramian, we generally need to set $n_{integral}$ to be larger for the approximation to be good. Here, we are interested in the positions of the first 40 sensors. We set $n_{integral}$ to be 130 for this numerical experiment. 
+
+% Now, we want to solve the initial condition problem by leveraging the fast algorithm. We generated an initial condition and founded the minimum number of sensors needed to recover this particular initial condition. For comparison, we ask a random number generator to select the same amount of sensors but at random positions. We then compared the quality of the recovered initial condition based on those two observation scheme. In terms of the parameters of the fast algorithm, we selected 10 sensors by setting the objective as the log det of top 10 eigenvalues. 
+
+% \begin{figure}[!htb]
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{good initial condition.png}
+%   \caption{Carefully selected sensor placement}\label{fig:awesome_image1}
+% \endminipage\hfill
+% \minipage{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{bad initial condition.png}
+%   \caption{Randomly selected sensor placement}\label{fig:awesome_image2}
+% \endminipage\hfill
+% \end{figure}
+
+
+% % With the choose basis, the explicit form of the M $\in \mathbb{R}^{(n+2)*(n+2)}$,A $\in \mathbb{R}^{(n+2)*(n+2)}$, and B $\in \mathbb{R}^{(n+2)*(2)}$ matrices are:
+% % \begin{gather}
+% %  M = h/6 \begin{bmatrix} 
+% %  2 & 1 \\
+% %  1 & 4 & 1\\
+% %  \ddots & \ddots & \ddots\\
+% %  && 1 & 4 & 1\\
+% %  &&& 1 & 2 
+% %  \end{bmatrix}
+% % \end{gather}
+
+% Because we are randomly selecting 10 positions out of 302 possible positions for sensor placement, sometimes the sensor placements are clustered and suboptimal. It can be seen from the right graph that maybe more sensors are needed near the right ends. However, when we are selecting sensors based on log det of observability gramian, we noticed the algorithm always places two sensors near the two ends and then place one sensor in the middle. Afterwards, the algorithm places sensors in between those points. Intuitively, this sensor placement does seem better than random placement. 
 
 
 
