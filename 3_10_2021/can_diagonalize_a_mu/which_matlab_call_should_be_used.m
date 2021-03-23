@@ -25,7 +25,7 @@ for index = 1:length(old_sensors)
     sensor_location = old_sensors(index);
     old_c_matrix(sensor_location,sensor_location) = 1;
 end
-old_og_matlab = lyap(total_a',old_c_matrix'*total_m*old_c_matrix,[],total_m');
+old_og_matlab = lyap(total_a',total_m'*old_c_matrix'*old_c_matrix*total_m,[],total_m');
 old_og_matlab2 = lyap((total_m\eye(n+2,n+2))*total_a,old_c_matrix*old_c_matrix);
 
 
