@@ -1,0 +1,8 @@
+clc;
+clear;
+
+saved_matrix = matfile('recovery_quality_with_naive_implementation.mat');
+naive_og = saved_matrix.norm_diff;
+
+saved_matrix = matfile('recovery_quality_with_random.mat');
+random_og = saved_matrix.norm_diff;

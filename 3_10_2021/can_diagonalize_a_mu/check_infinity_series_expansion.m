@@ -10,7 +10,7 @@ gamma = 0.5; % Robin coefficient, this is part of the boundry condition
 alpha = 0.0001; % Control penalty parameter, this parameter originates from the objective function
 heat_constant = 1; %The constant in the heat equation. 
 mu = -1;
-max_term = 10; %max term of the infinity series expansion of the gramian. 
+max_term = 3; %max term of the infinity series expansion of the gramian. 
 
 
 [M, A, B, R] = buildFEM(n, gamma);
@@ -21,7 +21,7 @@ total_m = full(M);
 
 
 %given the old sensor and compute the observability gramian
-old_sensors = [1,5,9];
+old_sensors = [];
 old_c_matrix = zeros(n+2,n+2);
 for index = 1:length(old_sensors)
     sensor_location = old_sensors(index);
@@ -45,7 +45,7 @@ c_mu_helper_right = ((total_m_inv*total_a)'+mu*eye(n+2,n+2))\eye(n+2,n+2);
 a_mu_v_inv = a_mu_v\eye(n+2,n+2);
 
 %new sensor index
-new_sensor = 3;
+new_sensor = n+2;
 new_c_matrix = zeros(n+2,n+2);
 new_c_matrix(new_sensor,new_sensor) = 1;
 
@@ -78,14 +78,15 @@ for term_index = 1:max_term
 end
 
 %now, we can compute the full gramian
-new_og_infinity_series = old_og_matlab + (-2*mu)*sylvester_a*sylvester_b;
+new_og_infinity_series = old_og_matlab + (-2*mu)*sylvester_a*sylvester_b
 
 new_c_total_matrix = old_c_matrix+new_c_matrix;
 new_og_matlab = lyap(total_a',total_m'*(new_c_total_matrix'*new_c_total_matrix)*total_m,[],total_m');
 new_og_matlab2 = lyap((total_m\eye(n+2,n+2))*total_a,new_c_total_matrix*new_c_total_matrix);
 
+new_og_matlab
 
-diff = new_og_matlab-new_og_infinity_series
-diff = new_og_matlab2-(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_b)
+diff = new_og_matlab-new_og_infinity_series;
+diff = new_og_matlab2-(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_b);
 
 
