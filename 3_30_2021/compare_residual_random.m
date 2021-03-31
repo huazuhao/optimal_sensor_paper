@@ -79,48 +79,20 @@ best_recovery_norm = norm(U0-U_init_recover,'fro');
 %%
 %here, we want to build a for loop for selecting sensors
 
-selected_obs = [1,n+2,floor(n/2+1)]; %this records what points are being selected for observation
-
-for iteration_index = 1:10
+for iteration_index = 1:13
     
     disp(iteration_index)
     
     
-    %greedy algorithm for maximizing og
-    c_matrix = zeros(n+2,n+2);
-    for index = 1:length(selected_obs)
-        non_zero_index = selected_obs(index);
-        c_matrix(non_zero_index, non_zero_index) = 1;
-    end
-    next_potential_placement = ones(1,n+2);
-    for index = 1:length(selected_obs)
-        already_selected = selected_obs(index);
-        next_potential_placement(already_selected) = 0;
-    end
-    
-    log_det_og_matlab = ones(1,n+2)*(-1e16);
-    
-    %parfor index = 1:n+2
-    for index = 1:n+2    
-        %construct a new c matrix
-        if next_potential_placement(index) ~= 0
-            new_c_matrix = c_matrix;
-            new_c_matrix(index,index) = 1;
-            og_matlab = lyap(total_a',total_m'*(new_c_matrix'*new_c_matrix)*total_m,[],total_m');
-            [~,s_matlab,~] = svd(og_matlab);
-            log_det_matlab = sum(log(diag(s_matlab)));
-            log_det_og_matlab(index) = log_det_matlab;
-        end
-    end
-    [~,optimal_sensor_placement] = max(log_det_og_matlab);
-    selected_obs = [selected_obs,optimal_sensor_placement];
-    disp(selected_obs)
-
-    
-    
+    %random access
     state.is_state_computed = false;
     state.is_adjoint_computed = false;
-    state.obs_op= selected_obs;
+    position_index = randperm(n+2);
+    random_selected_obs = position_index(1:iteration_index);
+    state.obs_op= random_selected_obs; %obs_op means observation operator
+
+    state.is_state_computed = false;
+    state.is_adjoint_computed = false;
     Mobs = M;
     for i = 1:n+2
       if i~=state.obs_op
@@ -141,16 +113,14 @@ for iteration_index = 1:10
  
 end
 
-all_index = zeros(1,n+2);
-all_index(selected_obs) = 1;
-figure;
-plot(all_index);
 
 f = figure;
-plot(norm_diff','linewidth',3);
+x_tick = linspace(1,13,13);
+plot(x_tick,norm_diff','linewidth',3);
 %legend('full access to data','random access to data','og access to data');
-legend('exact og access to data');
+legend('random access to data');
 ylabel('frobenius norm of difference between truth and recovered')
 xlabel('sensor count')
+xlim([1,13])
 
-save('recovery_quality_with_naive_implementation.mat','norm_diff')
+save('recovery_quality_with_random.mat','norm_diff')

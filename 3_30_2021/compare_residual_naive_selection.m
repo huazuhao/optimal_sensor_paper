@@ -79,9 +79,9 @@ best_recovery_norm = norm(U0-U_init_recover,'fro');
 %%
 %here, we want to build a for loop for selecting sensors
 
-selected_obs = [1,n+2,floor(n/2+1)]; %this records what points are being selected for observation
+selected_obs = []; %this records what points are being selected for observation
 
-for iteration_index = 1:10
+for iteration_index = 1:13
     
     disp(iteration_index)
     
@@ -147,10 +147,12 @@ figure;
 plot(all_index);
 
 f = figure;
-plot(norm_diff','linewidth',3);
+x_tick = linspace(1,13,13);
+plot(x_tick,norm_diff','linewidth',3);
 %legend('full access to data','random access to data','og access to data');
 legend('exact og access to data');
 ylabel('frobenius norm of difference between truth and recovered')
 xlabel('sensor count')
+xlim([1,13])
 
 save('recovery_quality_with_naive_implementation.mat','norm_diff')

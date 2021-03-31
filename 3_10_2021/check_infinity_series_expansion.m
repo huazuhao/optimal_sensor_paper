@@ -84,9 +84,10 @@ new_c_total_matrix = old_c_matrix+new_c_matrix;
 new_og_matlab = lyap(total_a',total_m'*(new_c_total_matrix'*new_c_total_matrix)*total_m,[],total_m');
 new_og_matlab2 = lyap((total_m\eye(n+2,n+2))*total_a,new_c_total_matrix*new_c_total_matrix);
 
-new_og_matlab
+new_og_matlab2
 
 diff = new_og_matlab-new_og_infinity_series;
 diff = new_og_matlab2-(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_b);
 
+det(new_og_matlab2)
 
