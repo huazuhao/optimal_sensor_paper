@@ -22,7 +22,7 @@ gamma = 0.5; % Robin coefficient, this is part of the boundry condition
 alpha = 0.00001; % Control penalty parameter, this parameter originates from the objective function
 heat_constant = 1; %The constant in the heat equation. 
 mu = -10; %mu, which should a number less than zero, from equation 3.3 of the paper titled "A modified low-rank smith method for large-scale lyapunov equations"
-max_term = 10; %max term of the infinity series expansion of the gramian. 
+max_term = 0; %max term of the infinity series expansion of the gramian. 
 iteration_step_low_rank_smith = 50; %Number of iterations in the low rank smith method for computing the observability gramian
 projection_rank_cut_off = 15; %Set the dimensionality of the subspace spanned by the observability gramian
 
@@ -165,12 +165,16 @@ for iteration_index = 1:10
             sigma_pre_top = og_pre_eig_val(1:projection_rank_cut_off,1:projection_rank_cut_off);
             sigma_pre_top_inv = sigma_pre_top\eye(projection_rank_cut_off,projection_rank_cut_off);
              
-             u_pre = og_pre_eig_vec(:,1:projection_rank_cut_off);
-             objective_det_sigma = det(sigma_pre_top);
-             objective_det_rest = eye(max_term+1,max_term+1)-2*mu*sylvester_a'*u_pre*sigma_pre_top_inv*u_pre'*sylvester_a;
-             objective_det_rest = det(objective_det_rest);
+            u_pre = og_pre_eig_vec(:,1:projection_rank_cut_off);
+            objective_det_sigma = det(sigma_pre_top);
+            objective_det_rest = eye(max_term+1,max_term+1)-2*mu*sylvester_a'*u_pre*sigma_pre_top_inv*u_pre'*sylvester_a;
              
-             log_det_objective(index) = objective_det_rest; %i can ignore det(sigma_pre_top) because they are the same
+            [~,s_matlab,~] = svd(objective_det_rest);
+            log_det_obj = sum(log(diag(s_matlab)));
+             
+            %objective_det_rest = det(objective_det_rest);
+             
+            log_det_objective(index) = log_det_obj; %i can ignore det(sigma_pre_top) because they are the same
             
             
         end
@@ -218,4 +222,4 @@ ylabel('frobenius norm of difference between truth and recovered')
 xlabel('sensor count')
 xlim([4,13])
 
-save('recovery_quality_with_infinite_series_terms_10.mat','norm_diff')
+save('recovery_quality_with_infinite_series_terms_0.mat','norm_diff')

@@ -1,4 +1,4 @@
-function [outputArg] = infinity_series_diff_function(space_dimension_size,mu,max_term)
+function [outputArg1,outputArg2] = infinity_series_diff_function(space_dimension_size,mu,max_term)
 
 
 
@@ -76,20 +76,27 @@ for term_index = 1:max_term
 end
 
 %now, we can compute the full gramian
-new_og_infinity_series = old_og_matlab + (-2*mu)*sylvester_a*sylvester_b;
 
 new_c_total_matrix = old_c_matrix+new_c_matrix;
-new_og_matlab = lyap(total_a',new_c_total_matrix'*total_m*new_c_total_matrix,[],total_m');
 new_og_matlab2 = lyap((total_m\eye(n+2,n+2))*total_a,new_c_total_matrix*new_c_total_matrix);
 
-
-diff = new_og_matlab-new_og_infinity_series;
-diff = new_og_matlab2-(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_b);
+diff = new_og_matlab2-(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_a');
 
 
 
-outputArg = norm(diff,'fro');
+outputArg1 = norm(diff,'fro');
 
+
+%check the difference of the determinant
+[~,s_matlab,~] = svd(new_og_matlab2);
+s_matlab = s_matlab(1:20,1:20);
+log_det_matlab = sum(log(diag(s_matlab)));
+
+[~,s_series,~] = svd(old_og_matlab2+(-2*mu)*sylvester_a*sylvester_a');
+s_series = s_series(1:20,1:20);
+log_det_series = sum(log(diag(s_series)));
+
+outputArg2 = abs(log_det_matlab-log_det_series);
 
 end
 
