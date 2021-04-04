@@ -63,7 +63,7 @@ state.is_adjoint_computed = false;
 
 %random access for spatial sensor
 position_index = randperm(n+2);
-random_selected_obs = position_index(1:40); %40 percent observation
+random_selected_obs = position_index(1:5); %40 percent observation
 state.obs_op= random_selected_obs; %obs_op means observation operator
 
 Mobs = M;
@@ -118,28 +118,28 @@ state.is_adjoint_computed = false;
 % now, we are going to solve the optimization problem with the old first
 % derivative problem
 
-U_guess   = zeros(n+2,1);
-
-options = optimoptions(@fminunc, ...
-                     'Algorithm', 'trust-region', ...
-                     'Display', 'iter', ...
-                     'SpecifyObjectiveGradient', true, ...
-                     'MaxIterations',100,...
-                     'FunctionToleranc',1e-12,...
-                     'OptimalityTolerance',1e-12);
-                 
-[U_init_recover,fmin_info,exitflag,output] = ...
-   fminunc(@(U_init)reducedObj_partial(U_init, state), U_guess, options);
-
-
-figure,
-plot(x,U_init_recover,'r-','LineWidth',3), hold on
-plot(x,U0,'k--','LineWidth',3), hold off
-legend('Computed-with only grad','True','Location','NorthEast')
-xlabel('x','FontSize',20)
-ylabel('U_0','FontSize',20)
-set(gca,'FontSize',16)
-print('-depsc2','results-nohess.eps')
+% U_guess   = zeros(n+2,1);
+% 
+% options = optimoptions(@fminunc, ...
+%                      'Algorithm', 'trust-region', ...
+%                      'Display', 'iter', ...
+%                      'SpecifyObjectiveGradient', true, ...
+%                      'MaxIterations',100,...
+%                      'FunctionToleranc',1e-12,...
+%                      'OptimalityTolerance',1e-12);
+%                  
+% [U_init_recover,fmin_info,exitflag,output] = ...
+%    fminunc(@(U_init)reducedObj_partial(U_init, state), U_guess, options);
+% 
+% 
+% figure,
+% plot(x,U_init_recover,'r-','LineWidth',3), hold on
+% plot(x,U0,'k--','LineWidth',3), hold off
+% legend('Computed-with only grad','True','Location','NorthEast')
+% xlabel('x','FontSize',20)
+% ylabel('U_0','FontSize',20)
+% set(gca,'FontSize',16)
+% print('-depsc2','results-nohess.eps')
 
 
 
@@ -153,16 +153,16 @@ state.is_adjoint_computed = false;
 U_guess   = zeros(n+2,1);
 [~, grad] = reducedObj_partial(U_guess, state);
 grad      = -grad;
-%U_init_recover = pcg(@(v)hessian_times_vector_partial(v,U_guess,state),grad,1e-18,n+2);
-%U_init_recover = U_init_recover+U_guess;
-
-H = zeros(n+2,n+2);
-for i = 1:n+2
-  v = zeros(n+2,1); v(i) = 1;
-  H(:,i) = hessian_times_vector_partial(v,U_guess,state);
-end
-U_init_recover = H \ grad;
+U_init_recover = pcg(@(v)hessian_times_vector_partial(v,U_guess,state),grad,1e-18,n+2);
 U_init_recover = U_init_recover+U_guess;
+
+% H = zeros(n+2,n+2);
+% for i = 1:n+2
+%   v = zeros(n+2,1); v(i) = 1;
+%   H(:,i) = hessian_times_vector_partial(v,U_guess,state);
+% end
+% U_init_recover = H \ grad;
+% U_init_recover = U_init_recover+U_guess;
 
 f = reducedObj_partial(U_init_recover,state);
 fprintf('  Final Objective Value: % 8.6e\n',f)
