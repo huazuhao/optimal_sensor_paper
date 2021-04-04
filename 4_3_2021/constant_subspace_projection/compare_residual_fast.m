@@ -22,7 +22,7 @@ gamma = 0.5; % Robin coefficient, this is part of the boundry condition
 alpha = 0.00001; % Control penalty parameter, this parameter originates from the objective function
 heat_constant = 1; %The constant in the heat equation. 
 mu = -10; %mu, which should a number less than zero, from equation 3.3 of the paper titled "A modified low-rank smith method for large-scale lyapunov equations"
-max_term = 50; %max term of the infinity series expansion of the gramian. 
+max_term = 10; %max term of the infinity series expansion of the gramian. 
 iteration_step_low_rank_smith = 50; %Number of iterations in the low rank smith method for computing the observability gramian
 projection_rank_cut_off = 10; %Set the dimensionality of the subspace spanned by the observability gramian
 
@@ -114,15 +114,16 @@ lyapunov_inf_series.c_mu_helper_right = c_mu_helper_right;
 %we now begin to select sensors. 
 
 selected_obs = [1,n+2,floor(n/2+1)]; %this records what points are being selected for observation
+init_selected_obs = [1,n+2,floor(n/2+1)];
 
 for iteration_index = 1:10
     
     disp(iteration_index)
     
-    %old sensor locations
+    %init sensor locations
     old_c_matrix = zeros(n+2,n+2);
-    for index = 1:length(selected_obs)
-        sensor_location = selected_obs(index);
+    for index = 1:length(init_selected_obs)
+        sensor_location = init_selected_obs(index);
         old_c_matrix(sensor_location,sensor_location) = 1;
     end
     
@@ -277,4 +278,4 @@ ylabel('frobenius norm of difference between truth and recovered')
 xlabel('sensor count')
 xlim([4,13])
 
-save('recovery_quality_with_infinite_series_terms_50.mat','norm_diff')
+save('recovery_quality_with_infinite_series_terms_10.mat','norm_diff')
